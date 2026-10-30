@@ -1,0 +1,5 @@
+import Link from 'next/link';
+import { ArrowUpRight, Instagram, MessageCircle } from 'lucide-react';
+export function Footer() {
+ return <footer className="site-footer"><div className="container footer-inner"><div><div className="footer-brand">CHEFELPI<span>✳</span></div><p>Sabores que cuentan historias.<br/>Hecho con pasión, para compartir.</p></div><div className="footer-links"><Link href="/sobre-chefelpi">Sobre Chefelpi</Link><Link href="/comidas">Pedir comida</Link><Link href="/libros">Recetarios</Link><Link href="/contacto">Contacto <ArrowUpRight size={14}/></Link></div><div className="footer-right"><span>¡Vamos a ello...!</span><p>Seguinos y descubrí lo próximo.</p><div className="footer-icons"><Link href="/contacto" aria-label="Consultar redes sociales"><Instagram size={18}/></Link><Link href="/contacto" aria-label="Consultar WhatsApp"><MessageCircle size={18}/></Link></div></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} CHEFELPI. Todos los derechos reservados.</span><span>Una experiencia hecha para disfrutar. · <Link href="/admin/login">Administración</Link></span></div></footer>;
+}

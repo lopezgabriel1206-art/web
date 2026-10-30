@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chefelpi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en el entorno}
+      POSTGRES_DB: chefelpi
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - chefelpi_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chefelpi -d chefelpi"]
+      interval: 10s
+      retries: 5
+volumes:
+  chefelpi_pg:

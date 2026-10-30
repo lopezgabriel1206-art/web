@@ -1,0 +1,10 @@
+import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowLeft, ChefHat } from 'lucide-react';
+import { OrderForm } from '@/components/forms/OrderForm';
+import { getDish, getSettings } from '@/lib/content';
+import { money } from '@/lib/utils';
+export const dynamic='force-dynamic';
+export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{const {slug}=await params;const dish=await getDish(slug);return {title:dish?.name||'Comida no encontrada'};}
+export default async function DishDetail({params}:{params:Promise<{slug:string}>}) {const {slug}=await params;const [dish,settings]=await Promise.all([getDish(slug),getSettings()]);if(!dish) notFound();return <section className="section container detail-layout"><div><Link href="/comidas" className="back-link"><ArrowLeft size={17}/> Volver a comidas</Link><div className="detail-art"><ChefHat size={90}/><span>Fotografía oficial pendiente</span></div><span className="eyebrow">{dish.category?.name||'ESPECIALIDAD'}</span><h1 className="detail-title">{dish.name}</h1><p className="lead">{dish.description||dish.summary}</p><div className="detail-facts"><div><span>PRECIO</span><strong>{money(dish.priceCents,settings.currencyCode)}</strong></div>{dish.portions&&<div><span>PORCIONES</span><strong>{dish.portions}</strong></div>}<div><span>DISPONIBILIDAD</span><strong>{dish.available?'Consultar disponibilidad':'No disponible por ahora'}</strong></div></div>{dish.ingredients&&<div className="info-block"><h3>Ingredientes principales</h3><p>{dish.ingredients}</p></div>}{dish.allergens&&<div className="info-block"><h3>Información sobre alérgenos</h3><p>{dish.allergens}</p></div>}{dish.delivery&&<div className="info-block"><h3>Condiciones de entrega</h3><p>{dish.delivery}</p></div>}</div><aside>{dish.available?<OrderForm dish={dish.name} phone={settings.whatsappNumber||''}/>:<div className="side-notice">Este plato no está disponible para pedidos en este momento.</div>}</aside></section>}

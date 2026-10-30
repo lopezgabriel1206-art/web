@@ -1,0 +1,6 @@
+import type {Metadata} from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
+import {ArrowUpRight} from 'lucide-react';
+export const metadata:Metadata={title:'Sobre Chefelpi'};
+export default function About(){return <><div className="page-hero"><div className="container"><span className="eyebrow">CONOCÉ LA MARCA</span><h1>Detrás de cada sabor, <em>una historia.</em></h1><p>Chefelpi: una propuesta donde la cocina, la creatividad y las ganas de compartir se encuentran.</p></div></div><section className="section container about-grid"><div className="about-medallion"><Image src="/images/chefelpi-emblema.jpg" alt="Logotipo original de Chefelpi" width={471} height={464}/></div><div><span className="eyebrow">NUESTRA IDENTIDAD</span><h2>La cocina como punto de encuentro.</h2><p>Chefelpi reúne preparaciones gastronómicas, recetarios digitales y contenidos pensados para quienes disfrutan cocinar y compartir.</p><p>La historia personal del chef y sus fotografías oficiales se incorporarán cuando estén disponibles, sin inventar datos biográficos.</p><div className="quote-mark">“¡Vamos a ello...!”</div><Link className="btn btn-primary" href="/contacto">Conectá con Chefelpi <ArrowUpRight size={18}/></Link></div></section></>}

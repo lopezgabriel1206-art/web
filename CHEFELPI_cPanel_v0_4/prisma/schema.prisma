@@ -1,0 +1,230 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PublicationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN
+}
+
+enum MediaVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+model AdminUser {
+  id           String         @id @default(cuid())
+  username     String         @unique
+  email        String?        @unique
+  name         String         @default("Chefelpi")
+  passwordHash String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  sessions     AdminSession[]
+}
+
+model AdminSession {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  @@index([userId, expiresAt])
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  loginKey  String
+  createdAt DateTime @default(now())
+  @@index([loginKey, createdAt])
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  dishes    Dish[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Dish {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  name        String
+  summary     String            @default("") @db.Text
+  description String            @default("") @db.Text
+  categoryId  String?
+  category    Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  priceCents  Int?
+  portions    String?
+  ingredients String?           @db.Text
+  allergens   String?           @db.Text
+  delivery    String?           @db.Text
+  imageUrl    String?
+  available   Boolean           @default(true)
+  featured    Boolean           @default(false)
+  status      PublicationStatus @default(DRAFT)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  @@index([status, featured])
+}
+
+model Book {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  title       String
+  summary     String            @default("") @db.Text
+  description String            @default("") @db.Text
+  topic       String?
+  content     String?           @db.Text
+  learn       String?           @db.Text
+  audience    String?           @db.Text
+  pageCount   Int?
+  priceCents  Int?
+  coverUrl    String?
+  // Referencia al objeto PRIVADO. Nunca se devuelve en consultas públicas.
+  privateFileKey String?
+  previewEnabled Boolean        @default(false)
+  featured    Boolean           @default(false)
+  status      PublicationStatus @default(DRAFT)
+  previews    BookPreview[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model BookPreview {
+  id        String @id @default(cuid())
+  bookId    String
+  book      Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  publicUrl String
+  order     Int    @default(0)
+  @@index([bookId, order])
+}
+
+model Video {
+  id          String            @id @default(cuid())
+  title       String
+  platform    String
+  sourceUrl   String
+  thumbnailUrl String?
+  description String?           @db.Text
+  featured    Boolean           @default(false)
+  status      PublicationStatus @default(DRAFT)
+  createdAt   DateTime          @default(now())
+}
+
+model SocialLink {
+  id             String   @id @default(cuid())
+  platform       String   @unique
+  url            String
+  highlightedUrl String?
+  views          BigInt?
+  lastSyncAt     DateTime?
+  syncError      String?
+  active         Boolean  @default(true)
+}
+
+model Review {
+  id          String       @id @default(cuid())
+  displayName String
+  experience  String
+  rating      Int
+  comment     String       @db.Text
+  consent     Boolean
+  submissionIpHash String?
+  status      ReviewStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  @@index([status, createdAt])
+  @@index([submissionIpHash, createdAt])
+}
+
+model Promotion {
+  id          String            @id @default(cuid())
+  title       String
+  description String            @db.Text
+  imageUrl    String?
+  linkUrl     String?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  featured    Boolean           @default(false)
+  status      PublicationStatus @default(DRAFT)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model DeliveryZone {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  priceCents  Int?
+  active      Boolean  @default(true)
+  note        String?
+  createdAt   DateTime @default(now())
+}
+
+model MediaAsset {
+  id          String          @id @default(cuid())
+  fileName    String
+  mimeType    String
+  storageKey  String          @unique
+  folder      String          @default("general")
+  visibility  MediaVisibility @default(PRIVATE)
+  sizeBytes   Int
+  createdAt   DateTime        @default(now())
+}
+
+model PageBlock {
+  id          String   @id @default(cuid())
+  page        String
+  kind        String
+  contentJson Json
+  order       Int      @default(0)
+  visible     Boolean  @default(true)
+  published   Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+  @@index([page, published, order])
+}
+
+model PageVersion {
+  id          String   @id @default(cuid())
+  page        String
+  snapshot    Json
+  createdAt   DateTime @default(now())
+  publishedAt DateTime?
+  @@index([page, createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  kind      String
+  title     String
+  message   String   @db.Text
+  href      String?
+  dedupKey  String?  @unique
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+}
